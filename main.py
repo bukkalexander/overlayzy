@@ -8,6 +8,9 @@ class TransparentOverlay(QtWidgets.QWidget):
         super().__init__()
         self.initUI()
 
+        
+        self.detection = image_blurring.Detection(20,435,1040,490,"bullet 1")
+
         # Initial central rectangle properties
         self.centerWidth = self.geometry().width() // 2
         self.centerHeight = self.geometry().height() // 2
@@ -15,7 +18,7 @@ class TransparentOverlay(QtWidgets.QWidget):
         # Set up a timer
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.onTimeout)
-        fps = 20
+        fps = 5
         ms_per_update = int(1000/fps)
         self.timer.start(ms_per_update)  # Trigger every 1000 milliseconds (1 second)
 
@@ -29,7 +32,7 @@ class TransparentOverlay(QtWidgets.QWidget):
         # Update properties for demonstration. This could be any logic you need.
         mouse_position = get_mouse_position()
         print(f"mouse position: x={mouse_position.x}, y={mouse_position.y}")
-        image_blurring.main(mouse_position)
+        self.detection = image_blurring.get_detection(mouse_position)
 
         self.centerWidth = max(100, (self.centerWidth - 10) % self.geometry().width())
         self.centerHeight = max(100, (self.centerHeight - 10) % self.geometry().height())
@@ -40,6 +43,10 @@ class TransparentOverlay(QtWidgets.QWidget):
         self.update()
 
     def paintEvent(self, event):
+
+        if not self.detection: 
+            return
+        
         painter = QtGui.QPainter(self)
         painter.setPen(QtCore.Qt.NoPen)
         
@@ -49,14 +56,24 @@ class TransparentOverlay(QtWidgets.QWidget):
         screenRect = self.geometry()
         
         # Central transparent area dimensions
-        centerX = (screenRect.width() - self.centerWidth) // 2
-        centerY = (screenRect.height() - self.centerHeight) // 2
+        #centerX = (screenRect.width() - self.centerWidth) // 2
+        #centerY = (screenRect.height() - self.centerHeight) // 2
         
+
+
         # Draw the four rectangles
-        painter.drawRect(0, 0, screenRect.width(), centerY)
-        painter.drawRect(0, centerY + self.centerHeight, screenRect.width(), centerY)
-        painter.drawRect(0, centerY, centerX, self.centerHeight)
-        painter.drawRect(centerX + self.centerWidth, centerY, centerX, self.centerHeight)
+        #top
+        painter.drawRect(0, 0, screenRect.width(), self.detection.top)
+        #bottom
+        painter.drawRect(0, self.detection.bottom, screenRect.width(), screenRect.height()-self.detection.bottom)
+        #left
+        painter.drawRect(0, self.detection.top, self.detection.left, self.detection.height)
+        #right
+        painter.drawRect(self.detection.right, self.detection.top, screenRect.width()-self.detection.right, self.detection.height)
+        
+        #painter.drawRect(0, centerY + self.centerHeight, screenRect.width(), centerY)
+        #painter.drawRect(0, centerY, centerX, self.centerHeight)
+        #painter.drawRect(centerX + self.centerWidth, centerY, centerX, self.centerHeight)
 
 def get_mouse_position():
     position = win32api.GetCursorPos()

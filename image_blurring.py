@@ -14,6 +14,14 @@ class Detection:
         self.bottom = bottom
         self.name = name
 
+    @property
+    def width(self): 
+        return self.right-self.left
+
+    @property
+    def height(self): 
+        return self.bottom-self.top
+
     def row_range(self):
         return range(self.top, self.bottom)
 
@@ -70,7 +78,7 @@ def save_image(image_file_path, image):
     print(f"saved image: {image_file_path}")
 
 
-def main(mouse_point):
+def get_detection(mouse_point):
     # 1. Define image size and read image to numpy array
     image_file_path = PRESENTATION_SLIDE_IMAGE_FILE_PATH
     image = get_image(image_file_path)
@@ -80,21 +88,23 @@ def main(mouse_point):
 
 
     detection = select_detection(detection_list, mouse_point)
-    if not detection is None:
-        print(detection.name)
+    # if not detection is None:
+    #     print(detection.name)
 
-        # 3. fill image mask with value True for each (row, col) that is inside the selected object
-        image_mask = get_image_mask(image, detection)
+    #     # 3. fill image mask with value True for each (row, col) that is inside the selected object
+    #     image_mask = get_image_mask(image, detection)
         
-        # 4. Modify original image for image mask indices 
-        processed_image = get_masked_image(image, image_mask)
+    #     # 4. Modify original image for image mask indices 
+    #     processed_image = get_masked_image(image, image_mask)
         
-        # 5. save the new image to file
-        processed_image_file_path = PROCESSED_PRESENTATION_SLIDE_IMAGE_FILE_PATH
-        save_image(processed_image_file_path, processed_image)
+    #     # 5. save the new image to file
+    #     processed_image_file_path = PROCESSED_PRESENTATION_SLIDE_IMAGE_FILE_PATH
+    #     save_image(processed_image_file_path, processed_image)
+
+    return detection
 
 if __name__=='__main__':
         
     mouse_point = Point(x=21, y=621)
 
-    main(mouse_point)
+    get_detection(mouse_point)
